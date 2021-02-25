@@ -109,6 +109,30 @@
                 </v-col>
               </v-row>
             </v-col>
+            <v-col cols="12" xs="12" sm="6" md="4">
+              <v-row>
+                <v-col cols="2" xs="2">
+                  <v-text-field 
+                       label="qty"
+                       v-model="ingredient.qty"
+                       number
+                       ></v-text-field>
+                </v-col>
+                <v-col cols="2" xs="2">
+                  <v-text-field
+                  label="unit"
+                  v-model="ingredient.unit"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="8" xs="8">
+                  <v-text-field
+                    v-on:keyup.enter="addIngredient()"
+                    :label="ingredient.name"
+                    v-model="ingredient.name"
+                    ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-col>
           </v-row>
           <v-row v-else>
             <v-col v-for="ingredient in activeRecipe.ingredients" :key="ingredient.name" cols="12" xs="12" sm="6" md="4">
@@ -177,12 +201,17 @@ export default {
     activeStep: {},
     windowHeight: window.innerHeight - 130,
     interval: {},
+    ingredient: { qty: "", unit: "", name: "" },
     value: 0,
   }),
   methods: {
     ...mapActions(["toggleEditRecipe", "createRecipe", "loadUserRecipe", "updateRecipe", "saveRecipe"]),
     ingredientLabel(ingredient){
       return ingredient.qty * this.servings + " " + ingredient.unit + " " + ingredient.name
+    },
+    addIngredient(){
+      this.activeRecipe.ingredients.push(this.ingredient)
+      this.ingredient = { qty: "", unit: "", name: "" }
     },
     stepLabel(index){
       const stepNumber = 1 + index
