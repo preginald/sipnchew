@@ -77,7 +77,19 @@
 
       <v-card class="mb-3">
         <v-card-actions>
-          <v-text-field label="servings" v-model="servings"></v-text-field>
+          <v-row>
+            <v-col cols="3">
+              <v-text-field label="servings" v-model="servings"></v-text-field>
+            </v-col>
+            <v-col cols="7">
+              <v-btn large :disabled="servingsDisabled" @click="servings--">
+                 <v-icon>mdi-minus-circle-outline</v-icon>
+              </v-btn>
+              <v-btn large @click="servings++">
+                 <v-icon>mdi-plus-circle-outline</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-card-actions>
       </v-card>
       <v-card class="mb-3">
@@ -221,6 +233,7 @@ export default {
   },
   data: () => ({
     servings: 1,
+    servingsDisabled: false,
     settings: [],
     play: false,
     stepIndex: 0,
@@ -235,16 +248,23 @@ export default {
   methods: {
     ...mapActions(["toggleEditRecipe", "createRecipe", "loadUserRecipe", "updateRecipe", "saveRecipe"]),
     ingredientLabel(ingredient){
-      return ingredient.qty * this.servings + " " + ingredient.unit + " " + ingredient.name
+      return ingredient.qty * this.servings + " "  + this.getIngredientUnit(ingredient.unit) + " "  + ingredient.name
     },
     ingredientLabelWithQty(ingredient){
-      return ingredient.qty * this.servings + " " + ingredient.unit + " " + ingredient.name
+      return ingredient.qty * this.servings + " " + this.getIngredientUnit(ingredient.unit) + " "  + ingredient.name
     },
     ingredientCalculate(task){
       const percent = task.percent/100
       const result = this.activeRecipe.ingredients.find(ingredient => ingredient.name == task.title) 
       if(percent){
-        return percent * result.qty + " " + result.unit
+        return percent * result.qty + " " + this.getIngredientUnit(result.unit)
+      }
+    },
+    getIngredientUnit(unit){
+      if(unit == "items"){
+        return ""
+      } else {
+        return unit
       }
     },
     ingredientTitle(task){
@@ -342,7 +362,6 @@ export default {
         if (this.activeStep.value > 99) {
           this.interval = {} 
           increment = 0
-          console.log(increment)
           this.interval = this.clearInterval(this.interval)
           this.playForward()
           return (this.activeStep.value = 0)
@@ -386,7 +405,14 @@ export default {
   watch: {
     activeRecipe: function (){
       this.getIngredientNames()
-    }
+    },
+      servings: function (){
+        if(this.servings < 2){
+          this.servingsDisabled = true
+        } else {
+          this.servingsDisabled = false
+        }
+      },
   },
 }
 </script>
