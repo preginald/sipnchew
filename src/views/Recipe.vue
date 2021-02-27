@@ -38,7 +38,7 @@
         <v-card-text>
           <v-checkbox
             v-model="task.status" 
-            :label="task.title" 
+            :label="ingredientTitle(task)" 
             v-for="(task, index) in activeStep.tasks" 
             :key="index"
             @change="checkTasks(activeStep.tasks)"
@@ -152,11 +152,38 @@
                 ></v-text-field>
             </v-card-title>
             <v-card-text v-for="(task, index) in step.tasks" :key="index">
-              <v-text-field
-                :label="taskLabel(index)"
-                v-model="task.title"
-                ></v-text-field>
+              <v-row>
+                <v-col v-if="step.ingredient" cols="3">
+                  <v-text-field
+                    label="%"
+                    v-model="task.percent"
+                    number
+                    max="100"
+                    v-on:keyup="ingredientCalculate(task)"
+                    ></v-text-field>
+                </v-col>
+                <v-col v-if="step.ingredient" cols="9">
+                  <v-select
+                    :items="ingredientNames"
+                    v-model="task.title"
+                    :label="ingredientCalculate(task)"
+                    ></v-select>
+                </v-col>
+                <v-col v-else cols="12">
+                  <v-text-field
+                    :label="taskLabel(index)"
+                    v-model="task.title"
+                    ></v-text-field>
+                </v-col>
+              </v-row>
             </v-card-text>
+            <v-card-actions>
+              <v-row>
+                <v-col>
+                  <v-btn @click="addTask(step)">+</v-btn>
+                </v-col>
+              </v-row>
+            </v-card-actions>
           </v-card>
         </v-col>
       </v-row>
@@ -166,7 +193,7 @@
           <v-card>
             <v-card-title>{{ step.title }}</v-card-title>
             <v-card-text v-for="task in step.tasks" :key="task.title">
-              <v-checkbox v-model="task.status" :label="task.title"></v-checkbox>
+              <v-checkbox v-model="task.status" :label="ingredientTitle(task)"></v-checkbox>
             </v-card-text>
           </v-card>
         </v-col>
@@ -203,15 +230,43 @@ export default {
     interval: {},
     ingredient: { qty: "", unit: "", name: "" },
     value: 0,
+    ingredientNames: [],
   }),
   methods: {
     ...mapActions(["toggleEditRecipe", "createRecipe", "loadUserRecipe", "updateRecipe", "saveRecipe"]),
     ingredientLabel(ingredient){
       return ingredient.qty * this.servings + " " + ingredient.unit + " " + ingredient.name
     },
+    ingredientLabelWithQty(ingredient){
+      return ingredient.qty * this.servings + " " + ingredient.unit + " " + ingredient.name
+    },
+    ingredientCalculate(task){
+      const percent = task.percent/100
+      const result = this.activeRecipe.ingredients.find(ingredient => ingredient.name == task.title) 
+      if(percent){
+        return percent * result.qty + " " + result.unit
+      }
+    },
+    ingredientTitle(task){
+      const qty = this.ingredientCalculate(task)
+      if(qty){
+        return qty + " " + task.title 
+      } else {
+        return task.title
+      }
+    },
+    getIngredientNames(){
+      this.ingredientNames = this.activeRecipe.ingredients.map(a => a.name)
+    },
     addIngredient(){
       this.activeRecipe.ingredients.push(this.ingredient)
       this.ingredient = { qty: "", unit: "", name: "" }
+    },
+    addTask(step){
+      if(step.ingredient){
+        step.tasks.push({percent: 0, status: false, title: "" })
+      }
+
     },
     stepLabel(index){
       const stepNumber = 1 + index
@@ -287,6 +342,7 @@ export default {
         if (this.activeStep.value > 99) {
           this.interval = {} 
           increment = 0
+          console.log(increment)
           this.interval = this.clearInterval(this.interval)
           this.playForward()
           return (this.activeStep.value = 0)
@@ -326,6 +382,11 @@ export default {
   },
   mounted() {
     this.init()
+  },
+  watch: {
+    activeRecipe: function (){
+      this.getIngredientNames()
+    }
   },
 }
 </script>
