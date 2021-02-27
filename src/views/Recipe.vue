@@ -76,21 +76,15 @@
       </v-toolbar>
 
       <v-card class="mb-3">
-        <v-card-actions>
-          <v-row>
-            <v-col cols="3">
-              <v-text-field label="servings" v-model="servings"></v-text-field>
-            </v-col>
-            <v-col cols="7">
-              <v-btn large :disabled="servingsDisabled" @click="servings--">
-                 <v-icon>mdi-minus-circle-outline</v-icon>
-              </v-btn>
-              <v-btn large @click="servings++">
-                 <v-icon>mdi-plus-circle-outline</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-card-actions>
+        <v-card-title>
+          <span class="mr-3">Servings {{ servings }}</span>
+          <v-btn class="mr-1" large :disabled="servingsDisabled" @click="servings--">
+             <v-icon>mdi-minus-circle-outline</v-icon>
+          </v-btn>
+          <v-btn large @click="servings++">
+             <v-icon>mdi-plus-circle-outline</v-icon>
+          </v-btn>
+        </v-card-title>
       </v-card>
       <v-card class="mb-3">
         <v-card-title>
@@ -233,7 +227,7 @@ export default {
   },
   data: () => ({
     servings: 1,
-    servingsDisabled: false,
+    servingsDisabled: true,
     settings: [],
     play: false,
     stepIndex: 0,
